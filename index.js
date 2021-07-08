@@ -1,39 +1,15 @@
 //  @ts-check
-import { fillRoundedRect, calcCoordinates } from "./lib.js";
-import * as Game from "./gol.js";
+import { Game, parsePattern } from "./lib/game.js";
+import { createCanvas, paint, visibleDimensions } from "./lib/renderer.js";
 
-/** @type HTMLCanvasElement */
-const c = document.getElementById("canv");
-const ctx = c.getContext("2d");
-
-/**
- * TODO: Increase density on retina displays so it doesn't look blurry
- * TODO: Maybe this can be optimized by only repainting updated cells
- * @param {import("./gol.js").World} world
- */
-function paint(world) {
-  ctx.clearRect(0, 0, c.width, c.height);
-
-  const gap = 2;
-  const s = 8;
-  const rows = world.height;
-  const cols = world.width;
-
-  for (let x = 0; x < cols; x++) {
-    for (let y = 0; y < rows; y++) {
-      const [posX, posY] = calcCoordinates(x, y, s, gap);
-      const fill = Game.isAlive(world.living, x, y)
-        ? "#51c4d3"
-        : "rgb(0, 0, 0, 0.05)";
-
-      fillRoundedRect(ctx, posX, posY, s, s, 4, fill);
-    }
-  }
-}
+// Renderer setup
+// TODO: Adjust on window resize
+const { canvas, ctx } = createCanvas("host");
+const { rows: height, cols: width } = visibleDimensions(canvas);
 
 // Game setup
-let world = Game.create(64, 64);
-const pattern = Game.parsePattern(`
+const game = new Game(width, height);
+const pattern = parsePattern(`
 ........................O
 ......................O.O
 ............OO......OO............OO
@@ -45,11 +21,11 @@ OO........O...O.OO....O.O
 ............OO
 `);
 
-Game.applyPattern(world, pattern, 8, 8);
+game.applyPattern(pattern, 8, 8);
+paint(game.living, canvas, ctx);
 
 // Main loop
-paint(world);
-window.setInterval(() => {
-  world = Game.tick(world);
-  paint(world);
-}, 100);
+(function go() {
+  paint(game.tick(), canvas, ctx);
+  requestAnimationFrame(go);
+})();
