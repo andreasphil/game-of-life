@@ -1,11 +1,11 @@
 //  @ts-check
 import { Game, parsePattern } from "./lib/game.js";
-import { createCanvas, paint, visibleDimensions } from "./lib/renderer.js";
+import { Renderer } from "./lib/renderer.js";
 
 // Renderer setup
 // TODO: Adjust on window resize
-const { canvas, ctx } = createCanvas("host");
-const { rows: height, cols: width } = visibleDimensions(canvas);
+const renderer = new Renderer("host", {});
+const { rows: height, cols: width } = renderer.visibleDimensions;
 
 // Game setup
 const game = new Game(width, height);
@@ -21,11 +21,11 @@ OO........O...O.OO....O.O
 ............OO
 `);
 
-game.applyPattern(pattern, 8, 8);
-paint(game.living, canvas, ctx);
+game.applyPattern(pattern, 60, 40);
+renderer.next(game.living);
 
 // Main loop
 (function go() {
-  paint(game.tick(), canvas, ctx);
+  renderer.next(game.tick());
   requestAnimationFrame(go);
 })();
