@@ -21,7 +21,7 @@ OO........O...O.OO....O.O
 ............OO
 `);
 
-game.applyPattern(pattern, 60, 40);
+game.applyPattern(pattern, 8, 8);
 renderer.next(game.living);
 
 // Main loop
